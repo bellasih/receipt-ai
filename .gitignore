@@ -205,3 +205,14 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+.secrets.toml
+chromadb/*
+models_ckpt/onnx/*
+models_ckpt/*
+data/*
+
+!chromadb/.gitkeep
+!models_ckpt/onnx/.gitkeep
+!models_ckpt/.gitkeep
+!data/.gitkeep
