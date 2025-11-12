@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* inter var - latin */
+  /* @font-face {
+    font-family: "Exo2";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: optional;
+    src: url("/fonts/Exo2-VariableFont_wght.ttf") format("ttf");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+      U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212,
+      U+2215, U+FEFF, U+FFFD;
+  } */
+
+  html {
+    font-family: "Exo 2";
+    line-height: 1.5;
+  }
+
+  /* Write your own custom base styles here */
+  h1 {
+    @apply text-3xl font-bold md:text-5xl;
+  }
+
+  h2 {
+    @apply text-2xl font-bold md:text-4xl;
+  }
+
+  h3 {
+    @apply text-xl font-bold md:text-3xl;
+  }
+
+  h4 {
+    @apply text-lg font-bold;
+  }
+
+  body {
+    @apply text-sm md:text-base;
+    @apply bg-gray-200;
+  }
+
+  .layout {
+    /* 750px */
+    /* max-width: 43.75rem; */
+
+    /* 1100px */
+    max-width: 68.75rem;
+    @apply w-11/12 mx-auto;
+  }
+
+  .hoverable:hover .menu {
+    display: inline;
+  }
+}
+
+.react-autosuggest__container {
+  position: relative;
+  width: 100%;
+  margin-right: 1rem;
+}
+
+.react-autosuggest__suggestions-container {
+  display: none;
+}
+
+.react-autosuggest__suggestions-container--open {
+  display: block;
+  position: absolute;
+  top: 51px;
+  width: 280px;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  z-index: 10000;
+}
+
+.react-autosuggest__suggestions-list {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.react-autosuggest__suggestion {
+  cursor: pointer;
+  padding: 10px 20px;
+}
+
+.react-autosuggest__suggestion--highlighted {
+  background-color: #ddd;
+}
+
+.react-autosuggest__section-container {
+  border-top: 1px dashed #ccc;
+}
+
+.react-autosuggest__section-container--first {
+  border-top: 0;
+}
+
+.react-autosuggest__section-title {
+  padding: 10px 0 0 10px;
+  font-size: 12px;
+  color: #777;
+}
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  width:125px;
+}
