@@ -1,80 +1,36 @@
 variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
-  ACCOUNT_ID: 633470416642
-  DEVELOPMENT_REGION: ap-southeast-1
-  PRODUCTION_REGION: ap-southeast-1 
-  CLUSTER_NAME_DEV: ai-stag-cluster
-  CLUSTER_NAME_PROD: ai-prod-cluster
-
-  FRONTLINER_TASK_DEFINITION_NAME: ai-stag-frontliner
-  FRONTLINER_IMAGE_NAME: ai-stag-frontliner
-  FRONTLINER_SERVICE_NAME_DEV: ai-service-frontliner
-
+  ACCOUNT_ID: ""
+  DOCKER_IMAGE_NAME: ""
 
 stages:
   - build_dev
-  - deploy_dev
-
 
 image: 
-  name: amazon/aws-cli
-  entrypoint: [""]
-
+  name: docker:latest
 
 services:
   - name: docker:20-dind
     command: ["--tls=false"]
 
-
 frontliner_build_dev:
   stage: build_dev
   before_script:
-    - amazon-linux-extras install docker
-    - aws --version
-    - docker --version
-    - yum install -y make
-    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-    - aws configure set region $DEVELOPMENT_REGION
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
   script:
-    - cd deployment/frontliner
-    - make docker-deploy-dev
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:latest
 
   after_script: []
   rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
       changes:
         - .gitlab-ci.yml
-        - deployment/frontliner/*/
+        - app/tools/*/
+        - app/prompts/*/
 
 
-frontliner_deploy_dev: 
-  stage: deploy_dev 
-  
-  before_script:
-    - yum install -y jq
-    - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-    - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-    - aws configure set region $DEVELOPMENT_REGION
-
-  script:
-    - IMAGE_TAG=$(date +'%d%m%Y')
-    - echo $IMAGE_TAG
-    - REPOSITORY_URL=${ACCOUNT_ID}.dkr.ecr.${DEVELOPMENT_REGION}.amazonaws.com/${FRONTLINER_IMAGE_NAME}
-    - echo $REPOSITORY_URL
-    - TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition "$FRONTLINER_TASK_DEFINITION_NAME" --region "${DEVELOPMENT_REGION}")
-    - CONTAINER_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$REPOSITORY_URL:$IMAGE_TAG" '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.registeredAt) | del(.registeredAt) | del(.registeredBy) | del(.requiresAttributes) | del(.compatibilities)')
-    - NEW_TASK_INFO=$(aws ecs register-task-definition --region $DEVELOPMENT_REGION --cli-input-json "$CONTAINER_DEFINITION")
-    - NEW_REVISION=$(echo $NEW_TASK_INFO | jq '.taskDefinition.revision')
-
-    - aws ecs update-service --cluster ${CLUSTER_NAME_DEV} --service ${FRONTLINER_SERVICE_NAME_DEV} --task-definition ${FRONTLINER_TASK_DEFINITION_NAME}:${NEW_REVISION} --desired-count 1 --force-new-deployment
-
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - .gitlab-ci.yml
-        - deployment/frontliner/*/
-
-  needs: [frontliner_build_dev]

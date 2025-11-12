@@ -25,7 +25,7 @@ class ReceiptTools():
         else:
             result = sqldb.insert(query)
         
-        return {'status':"success", "result":"result"}
+        return {'status':"success", "result":result}
 
     def format_passing(self, func):
         signature = inspect.signature(func)
