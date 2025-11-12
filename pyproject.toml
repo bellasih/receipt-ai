@@ -6,7 +6,7 @@ authors = [
     {name = "Your Name",email = "you@example.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4.0"
 dependencies = [
     "dynaconf (>=3.2.12,<4.0.0)",
     "google-genai (>=1.49.0,<2.0.0)",
@@ -22,6 +22,7 @@ dependencies = [
     "optimum-onnx[onnxruntime] (>=0.0.3,<0.0.4)",
     "fastapi (>=0.121.1,<0.122.0)",
     "pydantic (>=2.12.4,<3.0.0)",
+    "docling (>=2.61.2,<3.0.0)",
 ]
 
 [tool.poetry]

@@ -2,11 +2,12 @@ from receipt_ai.config.config import settings
 from receipt_ai.databases.base import Dao
 
 import mysql.connector
+import pandas as pd
 
 
 class MySqlDB(Dao):
     def __init__(self):
-        self.sql_conn = self.init_conn()
+        self.connection = self.init_conn()
         self.cursor = self.connection.cursor()
 
     def init_conn(self):
@@ -27,13 +28,18 @@ class MySqlDB(Dao):
             self.cursor.execute(query)
             self.connection.commit()
         except Exception as e:
+            print(e)
             self.connection.rollback()
 
     def select(self, query):
         try:
-            cursor = self.cursor.execute(query)
-            data = cursor.fetchall()
+            self.cursor.execute(query)
+            data = self.cursor.fetchall()
+            cols = []
+            for elt in self.cursor.description:
+                cols.append(elt[0])
+            df = pd.DataFrame(data=data, columns=cols)
 
-            return data
+            return df.to_string()
         except Exception as e:
             print(f'failed due to this errors occured: {e}')

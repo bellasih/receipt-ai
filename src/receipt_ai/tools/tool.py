@@ -1,4 +1,5 @@
 from receipt_ai.databases.sqldb import MySqlDB
+from receipt_ai.models.ocr import OcrInference
 
 from google.genai import types
 import inspect
@@ -6,6 +7,17 @@ import inspect
 class ReceiptTools():
     def __init__(self):
         pass
+
+    def get_ocr_inference(self, file_path:str) -> dict[str]:
+        """
+        Tools for getting inference result from ocr models with given file path to the
+        corresponding image
+
+        Args:
+        - file_path: path to the corresponding image
+        """
+        return {"result": OcrInference().get_result(file_path)}
+
 
     def get_data_from_query(self, query: str, is_select: str) -> dict[str, str]:
         """
@@ -20,12 +32,16 @@ class ReceiptTools():
         """
         sqldb = MySqlDB()
 
-        if is_select == "True":
-            result = sqldb.select(query)
-        else:
-            result = sqldb.insert(query)
+        try:
+            if is_select == "True":
+                result = sqldb.select(query)
+            else:
+                result = sqldb.insert(query)
+            status="success"
+        except Exception as e:
+            status="fail"
         
-        return {'status':"success", "result":result}
+        return {'status':status, "result":result}
 
     def format_passing(self, func):
         signature = inspect.signature(func)
@@ -53,5 +69,6 @@ class ReceiptTools():
         }
     
     def get_all_existing_func_tools(self):
-        return [self.format_passing(self.get_data_from_query)]
+        return [self.format_passing(self.get_data_from_query),
+                self.format_passing(self.get_ocr_inference)]
     
