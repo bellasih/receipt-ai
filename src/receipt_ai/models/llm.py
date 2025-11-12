@@ -1,5 +1,5 @@
 from receipt_ai.config.config import settings
-from receipt_ai.tools.tool import ReceiptTool
+from receipt_ai.tools.tool import ReceiptTools
 from receipt_ai.prompts.prompt import VisionReceiptExtractionPrompt, UserReceiptQueryInsightPrompt
 
 from google import genai
@@ -8,16 +8,16 @@ from string import Template
 
 
 class GeminiLLM():
-    def __init__(self, tools: ReceiptTool):
+    def __init__(self, tools: ReceiptTools):
         self.tools = tools
         self.llm_client = self.init_client()
 
-    def generate_output(self, user_input: str, prompts: str | Template, history_chat: list, data:dict, is_parallel:bool=False, is_stateless:bool=False):
+    def generate_output(self, user_input: str, prompts: str | Template, history_chat: list, is_parallel:bool=False, is_stateless:bool=False, *args, **kwargs):
 
         if type(prompts).__name__ != 'str':
-            prompt_text = prompts.get_prompt_template(user_input, data)
+            prompt_text = prompts.template.substitue(kwargs)
         else:
-            prompt_text = '\n\n'.join([prompts, user_input, data])
+            prompt_text = '\n\n'.join([prompts, user_input])
 
         contents = [
             types.Content(
@@ -48,7 +48,7 @@ class GeminiLLM():
             tool_response = self.get_response(contents, config)
             tool_call = tool_response.candidates[0].content.parts[0].function_call
 
-            if tool_call.name:
+            if tool_call != None:
                 related_tool_func = getattr(self.tools, tool_call.name)
                 result = related_tool_func(**tool_call.args)
 
@@ -60,17 +60,18 @@ class GeminiLLM():
                 contents.append(tool_response.candidates[0].content) 
                 contents.append(types.Content(role="user", parts=[function_response_part]))
 
-        response = self.get_response(contents, config)
+        response = self.get_response(contents, 
+                                     types.GenerateContentConfig(temperature=0.1))
 
         if not is_stateless:
-            contents.append(types.Content(role="model", parts=[response.text]))
+            contents.append(types.Content(role="model", parts=[types.Part(text=response.text)]))
             return response.text, contents
         else:
             return response.text, None
             
 
     def get_response(self, contents, config):
-        return self.client.models.generate_content(
+        return self.llm_client.models.generate_content(
             model=settings.GEMINI_MODEL,
             contents=contents,
             config=config,

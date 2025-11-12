@@ -9,7 +9,7 @@ from fastapi import FastAPI
 
 app = FastAPI(title="Receipt Chatbot")
 vectordb = ChromaVectorDB(collection_name=settings.CHROMA_COLLECTION_NAME)
-tools = ReceiptTools().get_tools()
+tools = ReceiptTools()
 llm = GeminiLLM(tools)
 
 defined_metadata = ['sql']
