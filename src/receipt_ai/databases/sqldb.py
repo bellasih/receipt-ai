@@ -40,6 +40,6 @@ class MySqlDB(Dao):
                 cols.append(elt[0])
             df = pd.DataFrame(data=data, columns=cols)
 
-            return df.to_string()
+            return df.to_json()
         except Exception as e:
             print(f'failed due to this errors occured: {e}')

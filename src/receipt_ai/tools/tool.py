@@ -19,7 +19,7 @@ class ReceiptTools():
         return {"result": OcrInference().get_result(file_path)}
 
 
-    def get_data_from_query(self, query: str, is_select: str) -> dict[str, str]:
+    def get_or_store_data_from_query(self, query: str, is_select: str) -> dict[str, str]:
         """
         Tools for getting data the correspond data based on given query
 
@@ -36,10 +36,15 @@ class ReceiptTools():
             if is_select == "True":
                 result = sqldb.select(query)
             else:
+                if "receipt_ai" not in query:
+                    query = query.replace('receipt_info_tb','receipt_ai.receipt_info_tb')
+
                 result = sqldb.insert(query)
             status="success"
         except Exception as e:
             status="fail"
+
+        print('$$', status)
         
         return {'status':status, "result":result}
 
@@ -69,6 +74,6 @@ class ReceiptTools():
         }
     
     def get_all_existing_func_tools(self):
-        return [self.format_passing(self.get_data_from_query),
+        return [self.format_passing(self.get_or_store_data_from_query),
                 self.format_passing(self.get_ocr_inference)]
     

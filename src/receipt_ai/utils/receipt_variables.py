@@ -16,3 +16,36 @@ CREATE TABLE IF NOT EXISTS receipt_ai.receipt_info_tb (
    primary key (id)
 );
 """
+
+extract_ocr_json_format_var = """
+```json
+{
+   vendor_name: <detected_vendor_name>,
+   vendor_address: <detected_vendor_address>,
+   items_info: [
+         {
+            item_name: <detected_item_name_1>,
+            item_cost: <detected_item_cost_1>,
+            item_type: <item_type_1>
+         },
+         {
+            item_name: <detected_item_name_2>,
+            item_cost: <detected_item_cost_2>,
+            item_type: <item_type_2>
+         }
+         ...
+   ],
+   issued_date: <detected_issued_date_with_time>,
+   subtotal: <detected_total_cost_before_tax>,
+   tax_rate: <detected_tax_rate>,
+   additional_cost: [
+         {
+            add_cost: <detected_additional_cost>,
+            type: <cost_type_such_as_tips_or_service>
+         }
+         ...
+   ],
+   final_cost: <detected_total_cost_after_tax_and_additional_cost>
+}
+```
+"""
